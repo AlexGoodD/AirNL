@@ -15,7 +15,8 @@ struct HomeView: View {
         NavigationStack {
             ScrollView {
                 VStack (spacing: 24) {
-                    VStack(spacing: 16) {
+                    
+                    VStack(spacing: 16){
                         HStack (alignment: .center) {
                             Label("Amsterdam", systemImage: "location.fill")
                                 .font(.caption)
@@ -52,6 +53,8 @@ struct HomeView: View {
                     .background(RoundedRectangle(cornerRadius: 20).fill(.background))
                     .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
                     
+                    
+                    
                     HStack(spacing: 16) {
                         SmallInfoCard(icon: "wind", title: "Wind Speed", value: "12 km/h")
                         SmallInfoCard(icon: "drop.fill", title: "Humidity", value: "68%")
@@ -68,7 +71,8 @@ struct HomeView: View {
                     .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemYellow).opacity(0.2)))
                     .padding(.horizontal)
                 }
-                .padding()
+                .padding(.horizontal)
+                
             }
             .navigationTitle("AirNL")
             
