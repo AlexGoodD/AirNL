@@ -75,6 +75,9 @@ struct HomeView: View {
                 
             }
             .navigationTitle("AirNL")
+#if os(iOS)
+            .navigationBarTitleDisplayMode(.large)
+#endif
             
             .toolbar {
 #if os(iOS)

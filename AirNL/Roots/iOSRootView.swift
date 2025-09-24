@@ -22,7 +22,7 @@ struct iOSRootView: View {
                     Label("Forecast", systemImage: "chart.line.uptrend.xyaxis")
                 }
             
-            HomeView()
+            StationsView()
                 .tabItem {
                     Label("Stations", systemImage: "map.fill")
                 }

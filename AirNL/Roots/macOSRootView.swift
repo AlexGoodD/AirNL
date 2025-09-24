@@ -20,7 +20,7 @@ struct macOSRootView: View {
             switch selection {
             case .home: HomeView()
             case .forecast: ForecastView()
-            case .stations: HomeView()
+            case .stations: StationsView()
             case .history: HomeView()
             default: Text("Select an item")
             }
