@@ -22,4 +22,9 @@ actor AirRepository {
         // 🚧 TODO: Llamar a backend
         return AQISample.mockData
     }
+    
+    func fetchForecast(hours: Int) async throws -> [AQISample] {
+        // 🚧 TODO: Llamar a backend
+        return AQISample.mockData
+    }
 }

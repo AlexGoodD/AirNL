@@ -37,14 +37,19 @@ struct HomeView: View {
                                 .foregroundStyle(.secondary)
                         }
                         
-                        AQISparklineChart(data: HomeVM.last8Hours)
+                        AQISparklineChart(
+                            data: HomeVM.last8Hours,
+                            title: "Last 8 hours",
+                            subtitle: "Trending up",
+                            chartHeight: 60
+                        )
                         
                         Button("View Forecast") {}
                             .buttonStyle(.borderedProminent)
                             .controlSize(.large)
                     }
                     .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).fill(Color(.systemBackground)))
+                    .background(RoundedRectangle(cornerRadius: 20).fill(.background))
                     .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
                     
                     HStack(spacing: 16) {
@@ -98,7 +103,7 @@ struct SmallInfoCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(RoundedRectangle(cornerRadius: 20).fill(Color(.systemBackground)))
+        .background(RoundedRectangle(cornerRadius: 20).fill(.background))
         .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
     }
 }

@@ -17,7 +17,7 @@ struct iOSRootView: View {
                     Label("Home", systemImage: "house.fill")
                 }
             
-            HomeView()
+            ForecastView()
                 .tabItem {
                     Label("Forecast", systemImage: "chart.line.uptrend.xyaxis")
                 }

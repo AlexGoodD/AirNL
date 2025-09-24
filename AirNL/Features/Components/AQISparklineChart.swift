@@ -12,19 +12,27 @@ import Charts
 
 struct AQISparklineChart: View {
     var data: [AQISample]
+    var title: String? = nil
+    var subtitle: String? = nil
+    var chartHeight: CGFloat = 60
+    var showAxis: Bool = false 
     
     var body: some View {
-        VStack (spacing: 15){
-            HStack (alignment: .center) {
-                Text("Last 8 hours")
-                    .font(.subheadline)
-                Spacer()
-                // TODO: Debe ser texto variable
-                Text("Trending up")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                
+        VStack(spacing: 15) {
+            if title != nil || subtitle != nil {
+                HStack (alignment: .center) {
+                    if let title = title {
+                        Text(title).font(.subheadline)
+                    }
+                    Spacer()
+                    if let subtitle = subtitle {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
+            
             Chart {
                 ForEach(data) { sample in
                     LineMark(
@@ -39,12 +47,12 @@ struct AQISparklineChart: View {
                         y: .value("AQI", sample.value)
                     )
                     .interpolationMethod(.catmullRom)
-                    .foregroundStyle(.blue.opacity(0.1))
+                    .foregroundStyle(.blue.gradient.opacity(0.2))
                 }
             }
-            .chartXAxis(.hidden)
-            .chartYAxis(.hidden)
-            .frame(height: 60)
+            .chartXAxis(showAxis ? .automatic : .hidden)
+            .chartYAxis(showAxis ? .automatic : .hidden)
+            .frame(height: chartHeight)
         }
     }
 }
