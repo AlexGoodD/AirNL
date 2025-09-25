@@ -10,6 +10,8 @@ import HealthKit
 
 final class HealthRepository {
     private let healthStore = HKHealthStore()
+    private let defaults = UserDefaults.standard
+    private let ageKey = "userAgeGroup"
 
     // Solicitar permiso
     func requestAuthorization() async throws {
@@ -18,23 +20,33 @@ final class HealthRepository {
         try await healthStore.requestAuthorization(toShare: [], read: typesToRead)
     }
 
-    // Obtener edad
-    func getUserAge() throws -> Int {
+    // Obtener edad de HealthKit
+    private func fetchUserAge() throws -> Int {
         guard let birthDate = try? healthStore.dateOfBirthComponents().date else {
-            throw NSError(domain: "HealthRepository", code: 1, userInfo: [NSLocalizedDescriptionKey: "Birth date not available"])
+            throw NSError(
+                domain: "HealthRepository",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Birth date not available"]
+            )
         }
         let calendar = Calendar.current
-        let age = calendar.dateComponents([.year], from: birthDate, to: Date()).year ?? 0
-        return age
+        return calendar.dateComponents([.year], from: birthDate, to: Date()).year ?? 0
     }
 
-    // Clasificar en grupo
-    func getAgeGroup() throws -> String {
-        let age = try getUserAge()
+    // Guardar grupo en UserDefaults
+    func cacheAgeGroup() throws {
+        let age = try fetchUserAge()
+        let group: String
         switch age {
-        case 0..<13: return "child"
-        case 13..<60: return "adult"
-        default: return "elderly"
+        case 0..<13: group = "child"
+        case 13..<60: group = "adult"
+        default: group = "elderly"
         }
+        defaults.set(group, forKey: ageKey)
+    }
+
+    // Leer grupo de UserDefaults
+    func getCachedAgeGroup() -> String? {
+        return defaults.string(forKey: ageKey)
     }
 }

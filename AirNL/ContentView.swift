@@ -24,5 +24,6 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+        .environmentObject(LocationRepository())
 //        .modelContainer(for: Item.self, inMemory: true)
 }

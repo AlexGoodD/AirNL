@@ -67,10 +67,8 @@ struct HomeView: View {
                 .padding(.horizontal)
                 
             }
-            .onAppear {
-                if let loc = locationRepo.userLocation {
-                    HomeVM.refresh(lat: loc.latitude, lon: loc.longitude)
-                }
+            .task {
+                HomeVM.refreshFromLocation(locationRepo.userLocation)
             }
             .scrollIndicators(.hidden)
             .navigationTitle("AirNL")
@@ -83,9 +81,7 @@ struct HomeView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        if let loc = locationRepo.userLocation {
-                            HomeVM.refresh(lat: loc.latitude, lon: loc.longitude)
-                        }
+                        HomeVM.refreshFromLocation(locationRepo.userLocation)
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
