@@ -15,7 +15,9 @@ struct AQISparklineChart: View {
     var title: String? = nil
     var subtitle: String? = nil
     var chartHeight: CGFloat = 60
-    var showAxis: Bool = false 
+    var showAxis: Bool = false
+    
+    @State private var animate = false
     
     var body: some View {
         VStack(spacing: 15) {
@@ -37,14 +39,14 @@ struct AQISparklineChart: View {
                 ForEach(data) { sample in
                     LineMark(
                         x: .value("Time", sample.time),
-                        y: .value("AQI", sample.value)
+                        y: .value("AQI", animate ? sample.value : 0)
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.blue)
                     
                     AreaMark(
                         x: .value("Time", sample.time),
-                        y: .value("AQI", sample.value)
+                        y: .value("AQI", animate ? sample.value : 0)
                     )
                     .interpolationMethod(.catmullRom)
                     .foregroundStyle(.blue.gradient.opacity(0.2))
@@ -53,6 +55,11 @@ struct AQISparklineChart: View {
             .chartXAxis(showAxis ? .automatic : .hidden)
             .chartYAxis(showAxis ? .automatic : .hidden)
             .frame(height: chartHeight)
+            .onAppear {
+                withAnimation(.easeOut(duration: 1.2)) {
+                    animate = true
+                }
+            }
         }
     }
 }

@@ -134,6 +134,7 @@ struct ForecastView: View {
                 }
                 .padding()
             }
+            .scrollIndicators(.hidden)
             .navigationTitle("Air Quality Forecast")
 #if os(iOS)
             .navigationBarTitleDisplayMode(.large)

@@ -74,6 +74,7 @@ struct HomeView: View {
                 .padding(.horizontal)
                 
             }
+            .scrollIndicators(.hidden)
             .navigationTitle("AirNL")
 #if os(iOS)
             .navigationBarTitleDisplayMode(.large)

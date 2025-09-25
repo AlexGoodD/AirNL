@@ -74,6 +74,8 @@ struct StationsView: View {
                     }
                     .padding(.horizontal)
                 }
+                .scrollIndicators(.hidden)
+                
             }
             .navigationTitle("Monitoring Stations")
 #if os(ios)

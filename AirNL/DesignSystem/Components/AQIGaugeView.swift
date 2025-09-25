@@ -10,16 +10,40 @@ import SwiftUI
 struct AQIGaugeView: View {
     var aqi: Int
     
+    @State private var animatedProgress: Double = 0
+    
     var body: some View {
-        Gauge(value: Double(aqi), in: 0...500) {
-            Text("AQI")
-        } currentValueLabel: {
-            Text("\(aqi)")
-                .font(.system(size: 58, weight: .bold, design: .rounded))
+        ZStack {
+            Circle()
+                .stroke(
+                    Color.gray.opacity(0.2),
+                    lineWidth: 10
+                )
+            
+            Circle()
+                .trim(from: 0, to: animatedProgress)
+                .stroke(
+                    color(for: aqi),
+                    style: StrokeStyle(
+                        lineWidth: 10,
+                        lineCap: .round
+                    )
+                )
+                .rotationEffect(.degrees(-90))
+                .animation(.easeOut(duration: 1.5), value: animatedProgress)
+            
+            VStack {
+                Text("\(Int(animatedProgress * 500))")
+                    .font(.system(size: 25, weight: .bold, design: .rounded))
+                Text("AQI")
+                    .font(.headline)
+                    .foregroundColor(.secondary)
+            }
         }
-        .gaugeStyle(.accessoryCircularCapacity)
-        .tint(Gradient(colors: [color(for: aqi), .gray.opacity(0.2)]))
-        .frame(width: 250, height: 250)
+        .frame(width: 100, height: 100)
+        .onAppear {
+            animatedProgress = Double(aqi) / 500.0
+        }
     }
     
     private func color(for value: Int) -> Color {
