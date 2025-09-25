@@ -11,6 +11,7 @@ struct AQIGaugeView: View {
     var aqi: Int
     
     @State private var animatedProgress: Double = 0
+    @State private var displayedAQI: Int = 0
     
     var body: some View {
         ZStack {
@@ -33,8 +34,10 @@ struct AQIGaugeView: View {
                 .animation(.easeOut(duration: 1.5), value: animatedProgress)
             
             VStack {
-                Text("\(Int(animatedProgress * 500))")
+                Text("\(displayedAQI)")
                     .font(.system(size: 25, weight: .bold, design: .rounded))
+                    .contentTransition(.numericText())
+                    .animation(.easeOut(duration: 1.5), value: displayedAQI)
                 Text("AQI")
                     .font(.headline)
                     .foregroundColor(.secondary)
@@ -42,9 +45,24 @@ struct AQIGaugeView: View {
         }
         .frame(width: 100, height: 100)
         .onAppear {
-            animatedProgress = Double(aqi) / 500.0
+            animatedProgress = 0
+            displayedAQI = 0
+            
+            DispatchQueue.main.async {
+                withAnimation(.easeOut(duration: 1.5)) {
+                    animatedProgress = Double(aqi) / 500.0
+                    displayedAQI = aqi
+                }
+            }
+        }
+        .onChange(of: aqi) { _, newValue in
+            withAnimation(.easeOut(duration: 1.5)) {
+                animatedProgress = Double(newValue) / 500.0
+                displayedAQI = newValue
+            }
         }
     }
+    
     
     private func color(for value: Int) -> Color {
         switch value {
@@ -59,5 +77,5 @@ struct AQIGaugeView: View {
 }
 
 #Preview {
-    AQIGaugeView(aqi: 50)
+    AQIGaugeView(aqi: 230)
 }

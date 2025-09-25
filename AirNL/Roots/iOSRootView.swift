@@ -26,11 +26,6 @@ struct iOSRootView: View {
                 .tabItem {
                     Label("Stations", systemImage: "map.fill")
                 }
-            
-            HomeView()
-                .tabItem {
-                    Label("History", systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90")
-                }
         }
     }
 }

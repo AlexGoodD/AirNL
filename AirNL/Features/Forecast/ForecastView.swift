@@ -66,18 +66,9 @@ struct ForecastView: View {
                     .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
                     
                     // Advisory
-                    Label {
-                        Text("Air quality will improve this evening. Avoid outdoor exercise between 2–4 PM when levels peak.")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    } icon: {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.title3)
-                            .foregroundColor(.yellow)
-                    }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).fill(.background))
-                    .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+                    
+                    NotificationBanner(icon: "exclamationmark.triangle.fill", title: nil, message: "Air quality will improve this evening. Avoid outdoor exercise between 2–4 PM when levels peak.")
+                
                     
                     // Hourly breakdown
                     Grid {

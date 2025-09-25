@@ -21,7 +21,6 @@ struct macOSRootView: View {
             case .home: HomeView()
             case .forecast: ForecastView()
             case .stations: StationsView()
-            case .history: HomeView()
             default: Text("Select an item")
             }
         }
@@ -29,7 +28,7 @@ struct macOSRootView: View {
 }
 
 enum SidebarItem: String, CaseIterable, Identifiable {
-    case home, forecast, stations, history
+    case home, forecast, stations
     
     var id: String { rawValue }
     var title: String {
@@ -37,7 +36,6 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .home: "Home"
         case .forecast: "Forecast"
         case .stations: "Stations"
-        case .history: "History"
         }
     }
     var icon: String {
@@ -45,7 +43,6 @@ enum SidebarItem: String, CaseIterable, Identifiable {
         case .home: "house.fill"
         case .forecast: "chart.line.uptrend.xyaxis"
         case .stations: "map.fill"
-        case .history: "clock.arrow.trianglehead.counterclockwise.rotate.90"
         }
     }
 }

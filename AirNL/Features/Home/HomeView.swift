@@ -51,8 +51,7 @@ struct HomeView: View {
                     }
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 20).fill(.background))
-                    .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
-                    
+                    .legacyShadow()
                     
                     
                     HStack(spacing: 16) {
@@ -60,16 +59,8 @@ struct HomeView: View {
                         SmallInfoCard(icon: "drop.fill", title: "Humidity", value: "68%")
                     }
                     
-                    VStack(alignment: .leading, spacing: 8) {
-                        Label("Health Advisory", systemImage: "exclamationmark.triangle.fill")
-                            .font(.headline)
-                        Text("Avoid outdoor activities if you are sensitive to pollution.")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 16).fill(Color(.systemYellow).opacity(0.2)))
-                    .padding(.horizontal)
+                    NotificationBanner(icon: "exclamationmark.triangle.fill", title: "Health Advisory", message: "Avoid outdoor activities if you are sensitive to pollution.")
+                    
                 }
                 .padding(.horizontal)
                 
@@ -112,7 +103,7 @@ struct SmallInfoCard: View {
         .frame(maxWidth: .infinity)
         .padding()
         .background(RoundedRectangle(cornerRadius: 20).fill(.background))
-        .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+        .legacyShadow()
     }
 }
 

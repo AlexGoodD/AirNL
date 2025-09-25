@@ -8,8 +8,6 @@
 import SwiftUI
 import Charts
 
-// Casos: Trending Up, Trending Down, Stable
-
 struct AQISparklineChart: View {
     var data: [AQISample]
     var title: String? = nil
@@ -17,7 +15,7 @@ struct AQISparklineChart: View {
     var chartHeight: CGFloat = 60
     var showAxis: Bool = false
     
-    @State private var animate = false
+    @State private var animateProgress: CGFloat = 0.0
     
     var body: some View {
         VStack(spacing: 15) {
@@ -39,25 +37,44 @@ struct AQISparklineChart: View {
                 ForEach(data) { sample in
                     LineMark(
                         x: .value("Time", sample.time),
-                        y: .value("AQI", animate ? sample.value : 0)
+                        y: .value("AQI", sample.value)
                     )
                     .interpolationMethod(.catmullRom)
-                    .foregroundStyle(.blue)
-                    
-                    AreaMark(
-                        x: .value("Time", sample.time),
-                        y: .value("AQI", animate ? sample.value : 0)
-                    )
-                    .interpolationMethod(.catmullRom)
-                    .foregroundStyle(.blue.gradient.opacity(0.2))
+                    .foregroundStyle(.clear)
                 }
             }
             .chartXAxis(showAxis ? .automatic : .hidden)
             .chartYAxis(showAxis ? .automatic : .hidden)
+            .chartYScale(domain: 0...400)
+            .chartOverlay { proxy in
+                GeometryReader { geo in
+                    Path { path in
+                        guard data.count > 1 else { return }
+                        
+                        // Convertir valores de datos → coordenadas de plot
+                        let points = data.enumerated().map { index, sample -> CGPoint in
+                            let xPos = proxy.position(forX: sample.time) ?? 0
+                            let yPos = proxy.position(forY: sample.value) ?? 0
+                            return CGPoint(x: xPos, y: yPos)
+                        }
+                        
+                        path.addLines(points)
+                    }
+                    .trim(from: 0, to: animateProgress)
+                    .stroke(.blue, style: StrokeStyle(lineWidth: 2, lineJoin: .round))
+                    .animation(.easeOut(duration: 1.5), value: animateProgress)
+                }
+            }
+            .transaction { t in
+                t.animation = nil
+            }
             .frame(height: chartHeight)
             .onAppear {
-                withAnimation(.easeOut(duration: 1.2)) {
-                    animate = true
+                animateProgress = 0.0
+                DispatchQueue.main.async {
+                    withAnimation(.easeOut(duration: 1.5)) {
+                        animateProgress = 1.0
+                    }
                 }
             }
         }
@@ -65,7 +82,7 @@ struct AQISparklineChart: View {
 }
 
 #Preview {
-    AQISparklineChart(data: AQISample.mockData)
-        .frame(height: 120)
+    AQISparklineChart(data: AQISample.mockData, showAxis: true)
+        .frame(height: 150)
         .padding()
 }
