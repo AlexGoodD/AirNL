@@ -10,6 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject var locationRepo: LocationRepository
     
     var body: some View {
 #if os(iOS)

@@ -9,6 +9,7 @@ import SwiftUI
 import Charts
 
 struct ForecastView: View {
+    @StateObject private var ForecastVM = ForecastViewModel()
     @State private var selectedRange = 3
     
     var body: some View {
@@ -45,7 +46,7 @@ struct ForecastView: View {
                     // Current conditions
                     HStack {
                         VStack {
-                            Text("78")
+                            Text("\(ForecastVM.currentAQI)")
                                 .font(.largeTitle).bold()
                             Text("AQI")
                                 .font(.footnote)

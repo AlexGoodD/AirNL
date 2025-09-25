@@ -11,6 +11,7 @@ import SwiftUI
 
 final class ForecastViewModel: ObservableObject {
     @Published var selectedRange: Int = 3  // 3, 8 o 12 horas
+    @Published var currentAQI: Int = 0
     @Published var forecastData: [AQISample] = []
     @Published var currentCondition: AQISample?
     
@@ -22,10 +23,11 @@ final class ForecastViewModel: ObservableObject {
     }
     
     @MainActor
-    func refresh() {
+    func refresh(lat: Double, lon: Double) {
         Task {
             do {
-                let forecast = try await repository.fetchForecast(hours: selectedRange)
+                // Aquí usamos fetchForecast (predicciones)
+                let forecast = try await repository.fetchForecast(lat: lat, lon: lon, hours: selectedRange)
                 forecastData = forecast
                 currentCondition = forecast.first
             } catch {

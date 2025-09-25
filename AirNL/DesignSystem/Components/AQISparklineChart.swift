@@ -45,7 +45,7 @@ struct AQISparklineChart: View {
             }
             .chartXAxis(showAxis ? .automatic : .hidden)
             .chartYAxis(showAxis ? .automatic : .hidden)
-            .chartYScale(domain: 0...400)
+            .chartYScale(domain: 0...500)
             .chartOverlay { proxy in
                 GeometryReader { geo in
                     Path { path in

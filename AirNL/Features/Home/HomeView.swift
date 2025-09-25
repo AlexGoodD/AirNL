@@ -6,10 +6,12 @@
 //
 
 import SwiftUI
+import MapKit
 import Charts
 
 struct HomeView: View {
     @StateObject private var HomeVM = HomeViewModel()
+    @EnvironmentObject var locationRepo: LocationRepository
     
     var body: some View {
         NavigationStack {
@@ -18,10 +20,10 @@ struct HomeView: View {
                     
                     VStack(spacing: 16){
                         HStack (alignment: .center) {
-                            Label("Amsterdam", systemImage: "location.fill")
+                            Label(HomeVM.actualLocation, systemImage: "location.fill")
                                 .font(.caption)
                             Spacer()
-                            Text("Updated 10:15 AM")
+                            Text("Updated \(HomeVM.lastUpdated, style: .time)")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -55,15 +57,20 @@ struct HomeView: View {
                     
                     
                     HStack(spacing: 16) {
-                        SmallInfoCard(icon: "wind", title: "Wind Speed", value: "12 km/h")
-                        SmallInfoCard(icon: "drop.fill", title: "Humidity", value: "68%")
+                        SmallInfoCard(icon: "wind", title: "Wind Speed", value: "\(HomeVM.windSpeed) km/h")
+                        SmallInfoCard(icon: "drop.fill", title: "Humidity", value: "\(HomeVM.humidityPercent)%")
                     }
                     
-                    NotificationBanner(icon: "exclamationmark.triangle.fill", title: "Health Advisory", message: "Avoid outdoor activities if you are sensitive to pollution.")
+                    NotificationBanner(icon: "exclamationmark.triangle.fill", title: "Health Advisory", message: HomeVM.adviceMessage)
                     
                 }
                 .padding(.horizontal)
                 
+            }
+            .onAppear {
+                if let loc = locationRepo.userLocation {
+                    HomeVM.refresh(lat: loc.latitude, lon: loc.longitude)
+                }
             }
             .scrollIndicators(.hidden)
             .navigationTitle("AirNL")
@@ -76,7 +83,9 @@ struct HomeView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        HomeVM.refresh()
+                        if let loc = locationRepo.userLocation {
+                            HomeVM.refresh(lat: loc.latitude, lon: loc.longitude)
+                        }
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
@@ -109,4 +118,5 @@ struct SmallInfoCard: View {
 
 #Preview {
     HomeView()
+        .environmentObject(LocationRepository())
 }

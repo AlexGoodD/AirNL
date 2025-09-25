@@ -6,25 +6,61 @@
 //
 
 import Foundation
+internal import _LocationEssentials
 
 actor AirRepository {
     static let shared = AirRepository()
     
-    // TODO: Conectar con API
-    private let api = "CAMBIAR"
-    
-    func fetchCurrentAQI() async throws -> AQISample {
-        // 🚧 TODO: Llamar a API
-        return AQISample(time: .now, value: Int.random(in: 50...120))
+    // MARK: Current AQ
+    func fetchCurrentAQ(lat: Double, lon: Double) async throws -> AQISample {
+        return try await AirAPI.fetchCurrentAQ(lat: lat, lon: lon)
     }
     
-    func fetchLastHours(hours: Int) async throws -> [AQISample] {
-        // 🚧 TODO: Llamar a backend
-        return AQISample.mockData
+    // MARK: Forecast
+    func fetchForecast(lat: Double, lon: Double, hours: Int) async throws -> [AQISample] {
+        let response = try await AirAPI.fetchForecast(lat: lat, lon: lon, hours: hours)
+        return response.series.map { point in
+            AQISample(
+                time: ISO8601DateFormatter().date(from: point.ts) ?? Date(),
+                value: point.aqi,
+                category: point.category,
+                pollutant: point.pollutant.uppercased()
+            )
+        }
     }
     
-    func fetchForecast(hours: Int) async throws -> [AQISample] {
-        // 🚧 TODO: Llamar a backend
-        return AQISample.mockData
+    // MARK: Fetch last hours
+    func fetchLastHours(lat: Double, lon: Double, hours: Int) async throws -> [AQISample] {
+            let forecast = try await AirAPI.fetchForecast(lat: lat, lon: lon, hours: hours)
+            return forecast.series.map { point in
+                AQISample(
+                    time: ISO8601DateFormatter().date(from: point.ts) ?? Date(),
+                    value: point.aqi,
+                    category: point.category,
+                    pollutant: point.pollutant.uppercased()
+                )
+            }
+        }
+    
+    // MARK: Stations
+    func fetchStations(lat: Double, lon: Double) async throws -> [Station] {
+        let stations = try await AirAPI.fetchStations(lat: lat, lon: lon)
+        return stations.map {
+            Station(
+                name: $0.name,
+                location: $0.location,
+                distance: $0.distance,
+                aqi: $0.aqi,
+                category: $0.category,
+                updated: $0.updated,
+                coordinate: .init(latitude: $0.lat, longitude: $0.lon)
+            )
+        }
+    }
+    
+    // MARK: Advice
+    func fetchAdvice(ageGroup: String, activity: String, lat: Double, lon: Double) async throws -> String {
+        let advice = try await AirAPI.fetchAdvice(ageGroup: ageGroup, activity: activity, lat: lat, lon: lon)
+        return advice.message
     }
 }
