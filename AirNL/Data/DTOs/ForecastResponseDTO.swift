@@ -16,7 +16,13 @@ struct ForecastResponseDTO: Codable {
         let category: String
         let source: String
     }
-    let location: [String: Double]
+    
+    struct Location: Codable {
+        let lat: Double
+        let lon: Double
+    }
+    
+    let location: Location
     let horizon_hours: Int
     let series: [AQPoint]
 }

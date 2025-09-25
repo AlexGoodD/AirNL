@@ -49,3 +49,19 @@ final class AQISample {
         }.reversed()
     }
 }
+
+extension AQISample {
+    static func mockData(hours: Int) -> [AQISample] {
+        let now = Date()
+        return (0..<hours).map { i in
+            AQISample(
+                time: Calendar.current.date(byAdding: .hour, value: i, to: now)!,
+                value: Int.random(in: 20...(50 + hours * 15)), // rango cambia según horas
+                category: ["Good", "Moderate", "Unhealthy"].randomElement()!,
+                pollutant: "PM2.5",
+                humidity: Int.random(in: 40...80),
+                windSpeed: Int.random(in: 0...20)
+            )
+        }
+    }
+}

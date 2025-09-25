@@ -10,43 +10,89 @@ import Charts
 
 struct ForecastView: View {
     @StateObject private var ForecastVM = ForecastViewModel()
-    @State private var selectedRange = 3
+    @EnvironmentObject var locationRepo: LocationRepository
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 24) {
-                    
-                    // Selector de rango
-                    Picker("Range", selection: $selectedRange) {
-                        Text("3 Hours").tag(3)
-                        Text("8 Hours").tag(8)
-                        Text("12 Hours").tag(12)
+            Group {
+                switch ForecastVM.state {
+                case .idle, .loading:
+                    VStack {
+                        Spacer()
+                        ProgressView("Loading forecast…")
+                            .progressViewStyle(.circular)
+                        Spacer()
                     }
-                    .pickerStyle(.segmented)
-                    .padding(.top, 8)
                     
-                    // Forecast Chart
-                    VStack{
-                        HStack {
-                            Text("PM2.5 Forecast")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                            Spacer()
-                            Text("Predicted")
-                                .font(.caption)
+                case .failed(let error):
+                    VStack(spacing: 16) {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .font(.largeTitle)
+                            .foregroundColor(.red)
+                        Text("Failed to load forecast")
+                            .font(.headline)
+                        Text(error.localizedDescription)
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Button("Retry") {
+                            Task {
+                                await ForecastVM.refreshFromLocation(locationRepo.userLocation)
+                            }
                         }
-                        AQISparklineChart(
-                            data: AQISample.mockData,
-                            chartHeight: 200,
-                            showAxis: true
-                        )
+                        .buttonStyle(.borderedProminent)
                     }
+                    .padding()
                     
-                    // Current conditions
+                case .loaded:
+                    forecastContent
+                }
+            }
+            .scrollIndicators(.hidden)
+            .navigationTitle("Air Quality Forecast")
+#if os(iOS)
+            .navigationBarTitleDisplayMode(.large)
+#endif
+            .task {
+                await ForecastVM.refreshFromLocation(locationRepo.userLocation)
+            }
+        }
+    }
+    
+    // 🔹 Extraigo la UI en un ViewBuilder
+    private var forecastContent: some View {
+        ScrollView {
+            VStack(spacing: 24) {
+                // Selector de rango
+                Picker("Range", selection: $ForecastVM.selectedRange) {
+                    Text("3 Hours").tag(3)
+                    Text("8 Hours").tag(8)
+                    Text("12 Hours").tag(12)
+                }
+                .pickerStyle(.segmented)
+                .padding(.top, 8)
+                
+                // Forecast Chart
+                VStack {
+                    HStack {
+                        Text("PM2.5 Forecast")
+                            .font(.headline)
+                            .fontWeight(.semibold)
+                        Spacer()
+                        Text("Predicted")
+                            .font(.caption)
+                    }
+                    AQISparklineChart(
+                        data: ForecastVM.forecastData,
+                        chartHeight: 200,
+                        showAxis: true
+                    )
+                }
+                
+                // Current conditions
+                if let current = ForecastVM.currentCondition {
                     HStack {
                         VStack {
-                            Text("\(ForecastVM.currentAQI)")
+                            Text("\(current.value)")
                                 .font(.largeTitle).bold()
                             Text("AQI")
                                 .font(.footnote)
@@ -54,9 +100,9 @@ struct ForecastView: View {
                         }
                         Divider()
                         VStack {
-                            Text("32")
-                                .font(.largeTitle).bold()
-                            Text("PM2.5 μg/m³")
+                            Text(current.pollutant)
+                                .font(.headline).bold()
+                            Text(current.category)
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -65,72 +111,44 @@ struct ForecastView: View {
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 20).fill(.background))
                     .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
-                    
-                    // Advisory
-                    
-                    NotificationBanner(icon: "exclamationmark.triangle.fill", title: nil, message: "Air quality will improve this evening. Avoid outdoor exercise between 2–4 PM when levels peak.")
+                }
                 
-                    
-                    // Hourly breakdown
-                    Grid {
-                        GridRow {
-                            Text("Time")
-                            Text("Category")
-                            Text("AQI")
-                        }
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        
-                        Divider()
-                        
-                        ForEach(AQISample.mockData, id: \.id) { sample in
-                            GridRow {
-                                Text(sample.time, style: .time)
-                                Text(sample.category)
-                                    .foregroundStyle(.secondary)
-                                Text("\(sample.value)")
-                                    .bold()
-                            }
-                            .padding(.vertical, 4)
-                            Divider()
-                        }
+                // Advisory
+                NotificationBanner(
+                    icon: "exclamationmark.triangle.fill",
+                    title: nil,
+                    message: "Air quality will improve this evening. Avoid outdoor exercise between 2–4 PM when levels peak."
+                )
+                
+                // Hourly breakdown
+                Grid {
+                    GridRow {
+                        Text("Time")
+                        Text("Category")
+                        Text("AQI")
                     }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).fill(.background))
-                    .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
                     
-                    // Actions
-                    VStack(spacing: 12) {
-                        Button {
-                            // set alert
-                        } label: {
-                            Label("Set Alert", systemImage: "bell.fill")
-                                .frame(maxWidth: .infinity)
+                    Divider()
+                    
+                    ForEach(ForecastVM.forecastData, id: \.id) { sample in
+                        GridRow {
+                            Text(sample.time, style: .time)
+                            Text(sample.category)
+                                .foregroundStyle(.secondary)
+                            Text("\(sample.value)")
+                                .bold()
                         }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
-                        .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
-
-
-                        Button {
-                            // share
-                        } label: {
-                            Label("Share Forecast", systemImage: "square.and.arrow.up")
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .controlSize(.large)
-                        .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
-
+                        .padding(.vertical, 4)
+                        Divider()
                     }
                 }
                 .padding()
+                .background(RoundedRectangle(cornerRadius: 20).fill(.background))
+                .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
             }
-            .scrollIndicators(.hidden)
-            .navigationTitle("Air Quality Forecast")
-#if os(iOS)
-            .navigationBarTitleDisplayMode(.large)
-#endif
+            .padding()
         }
     }
 }
