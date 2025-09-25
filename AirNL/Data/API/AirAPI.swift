@@ -13,7 +13,7 @@ struct AirAPI {
     static let baseURL = URL(string: "http://10.104.33.41:8000")!
     
     // MARK: Current AQ
-    static func fetchCurrentAQ(lat: Double, lon: Double) async throws -> AQISample {
+    static func fetchCurrentAQ(lat: Double, lon: Double) async throws -> AQISampleDTO {
         var components = URLComponents(
             url: baseURL.appendingPathComponent("aq/current"),
             resolvingAgainstBaseURL: false
@@ -23,16 +23,7 @@ struct AirAPI {
             URLQueryItem(name: "lon", value: "\(lon)")
         ]
         let (data, _) = try await URLSession.shared.data(from: components.url!)
-        let decoded = try JSONDecoder().decode(AQISampleDTO.self, from: data)
-        
-        return AQISample(
-            time: ISO8601DateFormatter().date(from: decoded.timestamp) ?? Date(),
-            value: decoded.aqi,
-            category: decoded.category,
-            pollutant: decoded.pollutant,
-            humidity: decoded.humidity.map { Int($0) },
-            windSpeed: decoded.wind_speed.map { Int($0) }     
-        )
+        return try JSONDecoder().decode(AQISampleDTO.self, from: data)
     }
     
     // MARK: Forecast
@@ -70,50 +61,8 @@ struct AirAPI {
             "location": ["lat": lat, "lon": lon]
         ]
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
-        
+
         let (data, _) = try await URLSession.shared.data(for: request)
         return try JSONDecoder().decode(AdviceDTO.self, from: data)
     }
-}
-
-struct AQISampleDTO: Codable {
-    let pollutant: String
-    let value: Double
-    let aqi: Int
-    let category: String
-    let timestamp: String
-    let source: String
-    let humidity: Double?      // 👈 nuevo
-    let wind_speed: Double?
-}
-
-struct ForecastResponseDTO: Codable {
-    struct AQPoint: Codable {
-        let ts: String
-        let pollutant: String
-        let value: Double
-        let aqi: Int
-        let category: String
-        let source: String
-    }
-    let location: [String: Double]
-    let horizon_hours: Int
-    let series: [AQPoint]
-}
-
-struct StationDTO: Codable, Identifiable {
-    let id: String
-    let name: String
-    let location: String
-    let distance: String
-    let aqi: Int
-    let category: String
-    let updated: String
-    let lat: Double
-    let lon: Double
-}
-
-struct AdviceDTO: Codable {
-    let message: String
-    let severity: String
 }

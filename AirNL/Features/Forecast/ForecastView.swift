@@ -137,4 +137,5 @@ struct ForecastView: View {
 
 #Preview {
     ForecastView()
+        .environmentObject(LocationRepository())
 }

@@ -43,7 +43,7 @@ struct HomeView: View {
                         AQISparklineChart(
                             data: HomeVM.last8Hours,
                             title: "Last 8 hours",
-                            subtitle: "Trending up",
+                            subtitle: HomeVM.trendingMessage,
                             chartHeight: 60
                         )
                         

@@ -131,4 +131,6 @@ struct StationCard: View {
 
 #Preview {
     StationsView()
+        .environmentObject(LocationRepository())
+
 }
