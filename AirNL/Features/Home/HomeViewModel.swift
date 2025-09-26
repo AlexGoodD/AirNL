@@ -21,6 +21,7 @@ final class HomeViewModel: ObservableObject {
     @Published var adviceMessage: String = "—"
     @Published var windSpeed: Int = 0
     @Published var humidityPercent: Int = 0
+    @Published var state: LoadingState = .idle
     
     private let repository: AirRepository
     private let healthRepo: HealthRepository
@@ -46,6 +47,7 @@ final class HomeViewModel: ObservableObject {
     @MainActor
     func refresh(lat: Double, lon: Double) {
         Task {
+            state = .loading
             do {
                 let ageGroup = try await resolveAgeGroup()
                 let latest = try await fetchLatestAQI(lat: lat, lon: lon)
@@ -59,19 +61,26 @@ final class HomeViewModel: ObservableObject {
                     advice: advice,
                     location: locationName
                 )
+                
+                state = .loaded
             } catch {
                 print("❌ Error fetching AQI: \(error)")
+                state = .failed(error)
             }
         }
     }
     
     private func resolveAgeGroup() async throws -> String {
+#if targetEnvironment(simulator)
+        return "adult" // fallback en simulador
+#else
         if let cached = healthRepo.getCachedAgeGroup() {
             return cached
         }
         try await healthRepo.requestAuthorization()
         try healthRepo.cacheAgeGroup()
         return healthRepo.getCachedAgeGroup() ?? "adult"
+#endif
     }
     
     private func fetchLatestAQI(lat: Double, lon: Double) async throws -> AQISample {

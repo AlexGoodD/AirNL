@@ -57,12 +57,6 @@ final class ForecastViewModel: ObservableObject {
     private func applyForecast(_ forecast: [AQISample]) {
         allData = forecast.sorted { $0.time > $1.time }
 
-        // 🔍 Debug: imprime todo lo que llega
-        print("📊 Forecast received (\(allData.count) items):")
-        for sample in allData {
-            print(" - \(sample.time) | AQI: \(sample.value) | Cat: \(sample.category)")
-        }
-
         currentCondition = allData.first
         updateSparkline()
         listData = Array(allData.prefix(10))
@@ -77,12 +71,4 @@ final class ForecastViewModel: ObservableObject {
         applyForecast(mock)
         state = .loaded
     }
-}
-
-// MARK: - View state
-enum LoadingState {
-    case idle
-    case loading
-    case loaded
-    case failed(Error)
 }

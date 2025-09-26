@@ -15,35 +15,14 @@ struct ForecastView: View {
     var body: some View {
         NavigationStack {
             Group {
-                switch ForecastVM.state {
-                case .idle, .loading:
-                    VStack {
-                        Spacer()
-                        ProgressView("Loading forecast…")
-                            .progressViewStyle(.circular)
-                        Spacer()
-                    }
-                    
-                case .failed(let error):
-                    VStack(spacing: 16) {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.largeTitle)
-                            .foregroundColor(.red)
-                        Text("Failed to load forecast")
-                            .font(.headline)
-                        Text(error.localizedDescription)
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Button("Retry") {
-                            Task {
-                                await ForecastVM.refreshFromLocation(locationRepo.userLocation)
-                            }
+                LoadingStateView(
+                    state: ForecastVM.state,
+                    retry: {
+                        Task {
+                            await ForecastVM.refreshFromLocation(locationRepo.userLocation)
                         }
-                        .buttonStyle(.borderedProminent)
                     }
-                    .padding()
-                    
-                case .loaded:
+                ) {
                     forecastContent
                 }
             }

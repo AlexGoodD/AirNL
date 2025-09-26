@@ -15,70 +15,24 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack (spacing: 24) {
-                    
-                    VStack(spacing: 16){
-                        HStack (alignment: .center) {
-                            Label(HomeVM.actualLocation, systemImage: "location.fill")
-                                .font(.caption)
-                            Spacer()
-                            Text("Updated \(HomeVM.lastUpdated, style: .time)")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                        
-                        AQIGaugeView(aqi: HomeVM.currentAQI)
-                            .frame(height: 100)
-                        
-                        VStack{
-                            Text(HomeVM.category)
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                            Text("Dominant pollutant: \(HomeVM.dominantPollutant)")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                        
-                        AQISparklineChart(
-                            data: HomeVM.last8Hours,
-                            title: "Last 8 hours",
-                            subtitle: HomeVM.trendingMessage,
-                            chartHeight: 60
-                        )
-                        
-                        Button("View Forecast") {}
-                            .buttonStyle(.borderedProminent)
-                            .controlSize(.large)
-                    }
-                    .padding()
-                    .background(RoundedRectangle(cornerRadius: 20).fill(.background))
-                    .legacyShadow()
-                    
-                    
-                    HStack(spacing: 16) {
-                        SmallInfoCard(icon: "wind", title: "Wind Speed", value: "\(HomeVM.windSpeed) km/h")
-                        SmallInfoCard(icon: "drop.fill", title: "Humidity", value: "\(HomeVM.humidityPercent)%")
-                    }
-                    
-                    NotificationBanner(icon: "exclamationmark.triangle.fill", title: "Health Advisory", message: HomeVM.adviceMessage)
-                    
+            LoadingStateView(
+                state: HomeVM.state,
+                retry: {
+                    HomeVM.refreshFromLocation(locationRepo.userLocation)
                 }
-                .padding(.horizontal)
-                
-            }
-            .task {
-                HomeVM.refreshFromLocation(locationRepo.userLocation)
+            ) {
+                homeContent
             }
             .scrollIndicators(.hidden)
             .navigationTitle("AirNL")
 #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
 #endif
-            
+            .task {
+                HomeVM.refreshFromLocation(locationRepo.userLocation)
+            }
             .toolbar {
 #if os(iOS)
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
                         HomeVM.refreshFromLocation(locationRepo.userLocation)
@@ -90,7 +44,63 @@ struct HomeView: View {
             }
         }
     }
+    
+    private var homeContent: some View {
+        ScrollView {
+            VStack (spacing: 24) {
+                VStack(spacing: 16){
+                    HStack (alignment: .center) {
+                        Label(HomeVM.actualLocation, systemImage: "location.fill")
+                            .font(.caption)
+                        Spacer()
+                        Text("Updated \(HomeVM.lastUpdated, style: .time)")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    
+                    AQIGaugeView(aqi: HomeVM.currentAQI)
+                        .frame(height: 100)
+                    
+                    VStack{
+                        Text(HomeVM.category)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                        Text("Dominant pollutant: \(HomeVM.dominantPollutant)")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    AQISparklineChart(
+                        data: HomeVM.last8Hours,
+                        title: "Last 8 hours",
+                        subtitle: HomeVM.trendingMessage,
+                        chartHeight: 60
+                    )
+                    
+                    Button("View Forecast") {}
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                }
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 20).fill(.background))
+                .legacyShadow()
+                
+                HStack(spacing: 16) {
+                    SmallInfoCard(icon: "wind", title: "Wind Speed", value: "\(HomeVM.windSpeed) km/h")
+                    SmallInfoCard(icon: "drop.fill", title: "Humidity", value: "\(HomeVM.humidityPercent)%")
+                }
+                
+                NotificationBanner(
+                    icon: "exclamationmark.triangle.fill",
+                    title: "Health Advisory",
+                    message: HomeVM.adviceMessage
+                )
+            }
+            .padding(.horizontal)
+        }
+    }
 }
+
 
 struct SmallInfoCard: View {
     let icon: String
