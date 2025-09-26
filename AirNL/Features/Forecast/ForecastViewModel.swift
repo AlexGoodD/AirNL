@@ -14,68 +14,67 @@ import SwiftUI
 final class ForecastViewModel: ObservableObject {
     // MARK: - Published state
     @Published var selectedRange: Int = 3 {
-        didSet { Task { await refreshIfPossible(skipStateUpdate: true) } }
+        didSet { updateSparkline() }
     }
-    @Published private(set) var forecastData: [AQISample] = []
+    @Published private(set) var allData: [AQISample] = []       
+    @Published private(set) var sparklineData: [AQISample] = []
+    @Published private(set) var listData: [AQISample] = []
     @Published private(set) var currentCondition: AQISample?
     @Published private(set) var state: LoadingState = .idle
-    
-    // MARK: - Dependencies
+
     private let repository: AirRepository
     private var lastLocation: (lat: Double, lon: Double)?
-    
-    // MARK: - Init
+
     init(repository: AirRepository = .shared) {
         self.repository = repository
 #if DEBUG
         loadMock()
 #endif
     }
-    
-    // MARK: - Public API
+
     func refreshFromLocation(_ location: CLLocationCoordinate2D?) async {
         guard let loc = location else { return }
         await refresh(lat: loc.latitude, lon: loc.longitude)
     }
-    
+
     func refresh(lat: Double, lon: Double) async {
         lastLocation = (lat, lon)
-        await loadForecast(lat: lat, lon: lon, updateState: true)
+        await loadForecast(lat: lat, lon: lon)
     }
-    
-    // MARK: - Private helpers
-    private func refreshIfPossible(skipStateUpdate: Bool = false) async {
-        guard let loc = lastLocation else { return }
-        await loadForecast(lat: loc.lat, lon: loc.lon, updateState: !skipStateUpdate)
-    }
-    
-    private func loadForecast(lat: Double, lon: Double, updateState: Bool) async {
-    #if DEBUG
-        forecastData = AQISample.mockData(hours: selectedRange)
-        currentCondition = forecastData.first
-        state = .loaded
-        return
-    #else
-        if updateState { state = .loading }
+
+    private func loadForecast(lat: Double, lon: Double) async {
+        state = .loading
         do {
-            let forecast = try await repository.fetchForecast(lat: lat, lon: lon, hours: selectedRange)
+            let forecast = try await repository.fetchForecast(lat: lat, lon: lon, hours: 24)
             applyForecast(forecast)
-            if updateState { state = .loaded }
+            state = .loaded
         } catch {
-            if updateState { state = .failed(error) }
+            state = .failed(error)
             print("❌ Error fetching forecast: \(error)")
         }
-    #endif
     }
-    
+
     private func applyForecast(_ forecast: [AQISample]) {
-        forecastData = forecast
-        currentCondition = forecast.first
+        allData = forecast.sorted { $0.time > $1.time }
+
+        // 🔍 Debug: imprime todo lo que llega
+        print("📊 Forecast received (\(allData.count) items):")
+        for sample in allData {
+            print(" - \(sample.time) | AQI: \(sample.value) | Cat: \(sample.category)")
+        }
+
+        currentCondition = allData.first
+        updateSparkline()
+        listData = Array(allData.prefix(10))
     }
-    
+
+    private func updateSparkline() {
+        sparklineData = Array(allData.prefix(selectedRange))
+    }
+
     private func loadMock() {
-        forecastData = AQISample.mockData(hours: selectedRange)
-        currentCondition = forecastData.first
+        let mock = AQISample.mockData(hours: 24).sorted { $0.time > $1.time }
+        applyForecast(mock)
         state = .loaded
     }
 }

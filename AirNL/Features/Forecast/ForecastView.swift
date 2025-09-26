@@ -82,7 +82,7 @@ struct ForecastView: View {
                             .font(.caption)
                     }
                     AQISparklineChart(
-                        data: ForecastVM.forecastData,
+                        data: ForecastVM.sparklineData,
                         chartHeight: 200,
                         showAxis: true
                     )
@@ -132,9 +132,14 @@ struct ForecastView: View {
                     
                     Divider()
                     
-                    ForEach(ForecastVM.forecastData, id: \.id) { sample in
+                    ForEach(Array(ForecastVM.listData.enumerated()), id: \.element.id) { index, sample in
                         GridRow {
-                            Text(sample.time, style: .time)
+                            if index == 0 {
+                                Text("Actually")
+                            } else {
+                                Text(localHourFormatter.string(from: sample.time))
+                            }
+
                             Text(sample.category)
                                 .foregroundStyle(.secondary)
                             Text("\(sample.value)")
@@ -152,6 +157,14 @@ struct ForecastView: View {
         }
     }
 }
+
+private let localHourFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "h:00 a"   // 5:00 PM, 4:00 PM
+    f.timeZone = TimeZone(identifier: "America/Monterrey")
+    f.locale = Locale(identifier: "en_US_POSIX")
+    return f
+}()
 
 #Preview {
     ForecastView()

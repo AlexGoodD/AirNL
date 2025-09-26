@@ -26,3 +26,12 @@ struct ForecastResponseDTO: Codable {
     let horizon_hours: Int
     let series: [AQPoint]
 }
+
+extension ForecastResponseDTO.AQPoint {
+    var date: Date {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        formatter.timeZone = TimeZone(identifier: "America/Monterrey") // 👈 forzar
+        return formatter.date(from: ts) ?? Date()
+    }
+}

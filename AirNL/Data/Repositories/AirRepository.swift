@@ -25,11 +25,12 @@ actor AirRepository {
     }
     
     // MARK: Forecast
+    @MainActor
     func fetchForecast(lat: Double, lon: Double, hours: Int) async throws -> [AQISample] {
         let response = try await AirAPI.fetchForecast(lat: lat, lon: lon, hours: hours)
         return response.series.map { point in
             AQISample(
-                time: ISO8601DateFormatter().date(from: point.ts) ?? Date(),
+                time: TimeFormatters.ts.date(from: point.ts) ?? Date(),
                 value: point.aqi,
                 category: point.category,
                 pollutant: point.pollutant.uppercased()
@@ -38,11 +39,12 @@ actor AirRepository {
     }
     
     // MARK: Fetch last hours
+    @MainActor
     func fetchLastHours(lat: Double, lon: Double, hours: Int) async throws -> [AQISample] {
         let forecast = try await AirAPI.fetchForecast(lat: lat, lon: lon, hours: hours)
         return forecast.series.map { point in
             AQISample(
-                time: ISO8601DateFormatter().date(from: point.ts) ?? Date(),
+                time: TimeFormatters.ts.date(from: point.ts) ?? Date(),
                 value: point.aqi,
                 category: point.category,
                 pollutant: point.pollutant.uppercased()

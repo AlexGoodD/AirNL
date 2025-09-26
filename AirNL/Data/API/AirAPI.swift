@@ -28,13 +28,25 @@ struct AirAPI {
     
     // MARK: Forecast
     static func fetchForecast(lat: Double, lon: Double, hours: Int) async throws -> ForecastResponseDTO {
-        var components = URLComponents(url: baseURL.appendingPathComponent("aq/forecast"), resolvingAgainstBaseURL: false)!
+        var components = URLComponents(
+            url: baseURL.appendingPathComponent("aq/forecast"),
+            resolvingAgainstBaseURL: false
+        )!
         components.queryItems = [
             URLQueryItem(name: "lat", value: "\(lat)"),
             URLQueryItem(name: "lon", value: "\(lon)"),
             URLQueryItem(name: "hours", value: "\(hours)")
         ]
-        let (data, _) = try await URLSession.shared.data(from: components.url!)
+        
+        let (data, response) = try await URLSession.shared.data(from: components.url!)
+        
+        if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode != 200 {
+            let raw = String(data: data, encoding: .utf8) ?? "N/A"
+            throw NSError(domain: "AirAPI", code: httpResponse.statusCode, userInfo: [
+                NSLocalizedDescriptionKey: "Server error (\(httpResponse.statusCode)): \(raw)"
+            ])
+        }
+        
         return try JSONDecoder().decode(ForecastResponseDTO.self, from: data)
     }
     
