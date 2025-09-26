@@ -23,19 +23,16 @@ final class HomeViewModel: ObservableObject {
     @Published var humidityPercent: Int = 0
     @Published var state: LoadingState = .idle
     
-    private let repository: AirRepository
-    private let healthRepo: HealthRepository
+    private let repository: AirRepositoryProtocol
+    private let healthRepo: HealthRepositoryProtocol
+    
     
     init(
-        repository: AirRepository = .shared,
-        healthRepo: HealthRepository = HealthRepository()
+        repository: AirRepositoryProtocol,
+        healthRepo: HealthRepositoryProtocol
     ) {
         self.repository = repository
         self.healthRepo = healthRepo
-        
-#if DEBUG
-        loadMock()
-#endif
     }
     
     @MainActor
@@ -123,18 +120,5 @@ final class HomeViewModel: ObservableObject {
         case let d where d < -threshold: return "Trending Down"
         default: return "Stable"
         }
-    }
-    
-    private func loadMock() {
-        actualLocation = "Amsterdám"
-        currentAQI = 72
-        category = "Moderate"
-        dominantPollutant = "PM2.5"
-        lastUpdated = .now
-        last8Hours = AQISample.mockData
-        trendingMessage = "Trending Up"
-        humidityPercent = 68
-        windSpeed = 12
-        adviceMessage = "Avoid outdoor activities if you are sensitive to pollution"
     }
 }

@@ -8,7 +8,7 @@
 import Foundation
 import HealthKit
 
-final class HealthRepository {
+final class HealthRepository: HealthRepositoryProtocol {
     private let healthStore = HKHealthStore()
     private let defaults = UserDefaults.standard
     private let ageKey = "userAgeGroup"

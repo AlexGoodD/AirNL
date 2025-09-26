@@ -11,26 +11,28 @@ import SwiftData
 @main
 struct AirNLApp: App {
     @StateObject private var locationRepo = LocationRepository()
-    
-    
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            //            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-        
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
-    
+
+    private let airRepository: AirRepositoryProtocol
+    private let healthRepository: HealthRepositoryProtocol
+
+    init() {
+        #if DEBUG
+        // 👉 Al correr en simulador o debug, usas mocks
+        airRepository = MockAirRepository()
+        healthRepository = MockHealthRepository()
+        #else
+        // 👉 En build Release (App Store/TestFlight), usas los reales
+        airRepository = AirRepository.shared
+        healthRepository = HealthRepository()
+        #endif
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(locationRepo)
+                .environment(\.airRepository, airRepository)
+                .environment(\.healthRepository, healthRepository)
         }
-        .modelContainer(sharedModelContainer)
     }
 }

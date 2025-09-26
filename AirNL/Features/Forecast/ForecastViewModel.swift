@@ -22,14 +22,11 @@ final class ForecastViewModel: ObservableObject {
     @Published private(set) var currentCondition: AQISample?
     @Published private(set) var state: LoadingState = .idle
 
-    private let repository: AirRepository
+    private let repository: any AirRepositoryProtocol
     private var lastLocation: (lat: Double, lon: Double)?
 
-    init(repository: AirRepository = .shared) {
+    init(repository: any AirRepositoryProtocol) {
         self.repository = repository
-#if DEBUG
-        loadMock()
-#endif
     }
 
     func refreshFromLocation(_ location: CLLocationCoordinate2D?) async {
@@ -64,11 +61,5 @@ final class ForecastViewModel: ObservableObject {
 
     private func updateSparkline() {
         sparklineData = Array(allData.prefix(selectedRange))
-    }
-
-    private func loadMock() {
-        let mock = AQISample.mockData(hours: 24).sorted { $0.time > $1.time }
-        applyForecast(mock)
-        state = .loaded
     }
 }

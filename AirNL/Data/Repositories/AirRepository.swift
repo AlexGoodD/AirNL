@@ -8,10 +8,11 @@
 import Foundation
 internal import _LocationEssentials
 
-actor AirRepository {
+actor AirRepository: AirRepositoryProtocol {
     static let shared = AirRepository()
     
     // MARK: Current AQ
+    @MainActor
     func fetchCurrentAQ(lat: Double, lon: Double) async throws -> AQISample {
         let dto = try await AirAPI.fetchCurrentAQ(lat: lat, lon: lon)
         return AQISample(

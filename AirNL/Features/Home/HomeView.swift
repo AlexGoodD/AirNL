@@ -10,8 +10,19 @@ import MapKit
 import Charts
 
 struct HomeView: View {
-    @StateObject private var HomeVM = HomeViewModel()
+    
+    @Environment(\.airRepository) private var repository
+    @Environment(\.healthRepository) private var healthRepo
     @EnvironmentObject var locationRepo: LocationRepository
+    
+    @StateObject private var HomeVM: HomeViewModel
+
+    init() {
+        _HomeVM = StateObject(wrappedValue: HomeViewModel(
+            repository: AirRepository.shared,
+            healthRepo: HealthRepository()
+        ))
+    }
     
     var body: some View {
         NavigationStack {

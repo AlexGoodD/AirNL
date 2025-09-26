@@ -9,8 +9,14 @@ import SwiftUI
 import Charts
 
 struct ForecastView: View {
-    @StateObject private var ForecastVM = ForecastViewModel()
+    @Environment(\.airRepository) private var repository
     @EnvironmentObject var locationRepo: LocationRepository
+    
+    @StateObject private var ForecastVM: ForecastViewModel
+    
+    init() {
+        _ForecastVM = StateObject(wrappedValue: ForecastViewModel(repository: AirRepository.shared))
+    }
     
     var body: some View {
         NavigationStack {
