@@ -16,6 +16,8 @@ struct HomeView: View {
     @EnvironmentObject var locationRepo: LocationRepository
     
     @StateObject private var HomeVM: HomeViewModel
+    
+    @State private var showForecastModal = false
 
     init() {
         _HomeVM = StateObject(wrappedValue: HomeViewModel(
@@ -88,9 +90,16 @@ struct HomeView: View {
                         chartHeight: 60
                     )
                     
-                    Button("View Forecast") {}
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
+                    Button("View Forecast") {
+                        showForecastModal = true
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .sheet(isPresented: $showForecastModal) {
+                        ForecastChartModal(repository: repository)
+                            .environmentObject(locationRepo)
+                            .presentationDetents([.medium, .large])
+                    }
                 }
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 20).fill(.background))
