@@ -10,19 +10,22 @@ import SwiftUI
 import SwiftUI
 
 struct iOSRootView: View {
+    @Environment(\.airRepository) private var repository
+    @Environment(\.healthRepository) private var healthRepo
+    
     var body: some View {
         TabView {
-            HomeView()
+            HomeView(repository: repository, healthRepo: healthRepo)
                 .tabItem {
                     Label("Home", systemImage: "house.fill")
                 }
             
-            ForecastView()
+            ForecastView(repository: repository)
                 .tabItem {
                     Label("Forecast", systemImage: "chart.line.uptrend.xyaxis")
                 }
             
-            StationsView()
+            StationsView(repository: repository)
                 .tabItem {
                     Label("Stations", systemImage: "map.fill")
                 }

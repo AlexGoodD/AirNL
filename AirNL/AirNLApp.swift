@@ -16,13 +16,18 @@ struct AirNLApp: App {
     private let healthRepository: HealthRepositoryProtocol
 
     init() {
-        #if DEBUG
+    #if DEBUG
+        #if targetEnvironment(simulator)
         airRepository = MockAirRepository()
         healthRepository = MockHealthRepository()
         #else
         airRepository = AirRepository.shared
         healthRepository = HealthRepository()
         #endif
+    #else
+        airRepository = AirRepository.shared
+        healthRepository = HealthRepository()
+    #endif
     }
 
     var body: some Scene {

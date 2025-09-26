@@ -52,7 +52,9 @@ final class StationsViewModel: ObservableObject {
         case 0...50: return .green
         case 51...100: return .yellow
         case 101...150: return .orange
-        default: return .red
+        case 151...200: return .red
+        case 201...300: return .purple
+        default: return .brown
         }
     }
 }

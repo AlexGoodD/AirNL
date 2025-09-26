@@ -9,13 +9,14 @@ import SwiftUI
 import Charts
 
 struct ForecastView: View {
-    @Environment(\.airRepository) private var repository
     @EnvironmentObject var locationRepo: LocationRepository
     
     @StateObject private var ForecastVM: ForecastViewModel
-    
-    init() {
-        _ForecastVM = StateObject(wrappedValue: ForecastViewModel(repository: AirRepository.shared))
+
+    init(repository: AirRepositoryProtocol) {
+        _ForecastVM = StateObject(wrappedValue: ForecastViewModel(
+            repository: repository
+        ))
     }
     
     var body: some View {
@@ -35,7 +36,7 @@ struct ForecastView: View {
             .scrollIndicators(.hidden)
             .navigationTitle("Air Quality Forecast")
 #if os(iOS)
-            .navigationBarTitleDisplayMode(.large)
+            .navigationBarTitleDisplayMode(.inline)
 #endif
             .task {
                 if case .idle = ForecastVM.state {
@@ -97,7 +98,7 @@ struct ForecastView: View {
                     .frame(maxWidth: .infinity)
                     .padding()
                     .background(RoundedRectangle(cornerRadius: 20).fill(.background))
-                    .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+                    .legacyShadow()
                 }
                 
                 // Advisory
@@ -138,7 +139,7 @@ struct ForecastView: View {
                 }
                 .padding()
                 .background(RoundedRectangle(cornerRadius: 20).fill(.background))
-                .shadow(color: .black.opacity(0.05), radius: 8, y: 4)
+                .legacyShadow()
             }
             .padding()
         }
@@ -154,6 +155,6 @@ private let localHourFormatter: DateFormatter = {
 }()
 
 #Preview {
-    ForecastView()
+    ForecastView(repository: MockAirRepository())
         .environmentObject(LocationRepository())
 }

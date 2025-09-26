@@ -13,11 +13,12 @@ struct StationsView: View {
     @EnvironmentObject private var LocRepo: LocationRepository
     
     @StateObject private var StationsVM: StationsViewModel
-    
-    init(repository: any AirRepositoryProtocol = AirRepository.shared) {
-        _StationsVM = StateObject(wrappedValue: StationsViewModel(repository: repository))
+
+    init(repository: AirRepositoryProtocol) {
+        _StationsVM = StateObject(wrappedValue: StationsViewModel(
+            repository: repository
+        ))
     }
-    
     
     @State private var position: MapCameraPosition = .automatic
     
@@ -106,50 +107,6 @@ struct StationsView: View {
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .padding(.horizontal)
         .padding(.top, 8)
-    }
-}
-
-struct StationCard: View {
-    let station: Station
-    let color: Color
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            ZStack {
-                Circle()
-                    .fill(color.opacity(0.85))
-                    .frame(width: 52, height: 52)
-                Text("\(station.aqi)")
-                    .font(.headline)
-                    .foregroundColor(.white)
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(station.name)
-                    .font(.headline)
-                Text(station.location)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Text(station.distance)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
-            
-            Spacer()
-            
-            VStack(alignment: .trailing, spacing: 4) {
-                Text(station.category)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Text(station.updated)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-            }
-        }
-        .padding()
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 }
 

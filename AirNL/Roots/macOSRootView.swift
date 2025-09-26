@@ -9,6 +9,8 @@ import SwiftUI
 
 struct macOSRootView: View {
     @State private var selection: SidebarItem? = .home
+    @Environment(\.airRepository) private var repository
+    @Environment(\.healthRepository) private var healthRepo
     
     var body: some View {
         NavigationSplitView {
@@ -18,9 +20,9 @@ struct macOSRootView: View {
             .listStyle(.sidebar)
         } detail: {
             switch selection {
-            case .home: HomeView()
-            case .forecast: ForecastView()
-            case .stations: StationsView()
+            case .home: HomeView(repository: repository, healthRepo: healthRepo)
+            case .forecast: ForecastView(repository: repository)
+            case .stations: StationsView(repository: repository)
             default: Text("Select an item")
             }
         }

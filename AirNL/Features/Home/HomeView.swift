@@ -12,19 +12,21 @@ import Charts
 struct HomeView: View {
     
     @Environment(\.airRepository) private var repository
-    @Environment(\.healthRepository) private var healthRepo
-    @EnvironmentObject var locationRepo: LocationRepository
     
+    @EnvironmentObject var locationRepo: LocationRepository
     @StateObject private var HomeVM: HomeViewModel
+    
+    init(repository: AirRepositoryProtocol, healthRepo: HealthRepositoryProtocol) {
+        _HomeVM = StateObject(wrappedValue: HomeViewModel(
+            repository: repository,
+            healthRepo: healthRepo
+        ))
+    }
     
     @State private var showForecastModal = false
 
-    init() {
-        _HomeVM = StateObject(wrappedValue: HomeViewModel(
-            repository: AirRepository.shared,
-            healthRepo: HealthRepository()
-        ))
-    }
+    
+    
     
     var body: some View {
         NavigationStack {
@@ -143,6 +145,9 @@ struct SmallInfoCard: View {
 }
 
 #Preview {
-    HomeView()
-        .environmentObject(LocationRepository())
+    HomeView(
+        repository: MockAirRepository(),
+        healthRepo: MockHealthRepository()
+    )
+    .environmentObject(LocationRepository())
 }
