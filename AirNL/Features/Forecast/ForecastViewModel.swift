@@ -21,24 +21,34 @@ final class ForecastViewModel: ObservableObject {
     @Published private(set) var listData: [AQISample] = []
     @Published private(set) var currentCondition: AQISample?
     @Published private(set) var state: LoadingState = .idle
-
+    
     private let repository: any AirRepositoryProtocol
     private var lastLocation: (lat: Double, lon: Double)?
-
+    private var lastUpdated: Date?
+    
     init(repository: any AirRepositoryProtocol) {
         self.repository = repository
     }
-
+    
     func refreshFromLocation(_ location: CLLocationCoordinate2D?) async {
         guard let loc = location else { return }
+        
+        if case .loaded = state,
+           let lastUpdated,
+           Date().timeIntervalSince(lastUpdated) < 600,
+           lastLocation?.lat == loc.latitude,
+           lastLocation?.lon == loc.longitude {
+            return
+        }
+        
         await refresh(lat: loc.latitude, lon: loc.longitude)
     }
-
+    
     func refresh(lat: Double, lon: Double) async {
         lastLocation = (lat, lon)
         await loadForecast(lat: lat, lon: lon)
     }
-
+    
     private func loadForecast(lat: Double, lon: Double) async {
         state = .loading
         do {
@@ -50,15 +60,17 @@ final class ForecastViewModel: ObservableObject {
             print("❌ Error fetching forecast: \(error)")
         }
     }
-
+    
     private func applyForecast(_ forecast: [AQISample]) {
         allData = forecast.sorted { $0.time < $1.time }
-
+        
         currentCondition = allData.first
         updateSparkline()
         listData = Array(allData.prefix(10))
+        
+        lastUpdated = Date()
     }
-
+    
     private func updateSparkline() {
         sparklineData = Array(allData.prefix(selectedRange))
     }

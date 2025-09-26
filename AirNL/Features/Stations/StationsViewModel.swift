@@ -12,22 +12,40 @@ import MapKit
 
 @MainActor
 final class StationsViewModel: ObservableObject {
-    
     @Published var stations: [Station] = []
+    @Published private(set) var state: LoadingState = .idle
+    
     private let repository: any AirRepositoryProtocol
+    
+    private var lastLocation: (lat: Double, lon: Double)?
+    private var lastUpdated: Date?
     
     init(repository: any AirRepositoryProtocol) {
         self.repository = repository
     }
     
     func loadStations(lat: Double, lon: Double) async {
-            do {
-                self.stations = try await repository.fetchStations(lat: lat, lon: lon)
-            } catch {
-                print("❌ Error fetching stations: \(error)")
-                self.stations = []
-            }
+        if case .loaded = state,
+           let lastUpdated,
+           Date().timeIntervalSince(lastUpdated) < 600,
+           lastLocation?.lat == lat,
+           lastLocation?.lon == lon {
+            return
         }
+        
+        state = .loading
+        do {
+            let apiStations = try await repository.fetchStations(lat: lat, lon: lon)
+            self.stations = apiStations
+            self.lastLocation = (lat, lon)
+            self.lastUpdated = Date()
+            state = .loaded
+        } catch {
+            print("❌ Error fetching stations: \(error)")
+            self.stations = []
+            state = .failed(error)
+        }
+    }
     
     func colorForAQI(_ value: Int) -> Color {
         switch value {

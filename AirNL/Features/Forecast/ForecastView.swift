@@ -38,7 +38,9 @@ struct ForecastView: View {
             .navigationBarTitleDisplayMode(.large)
 #endif
             .task {
-                await ForecastVM.refreshFromLocation(locationRepo.userLocation)
+                if case .idle = ForecastVM.state {
+                    await ForecastVM.refreshFromLocation(locationRepo.userLocation)
+                }
             }
         }
     }

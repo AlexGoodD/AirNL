@@ -38,6 +38,14 @@ final class HomeViewModel: ObservableObject {
     @MainActor
     func refreshFromLocation(_ location: CLLocationCoordinate2D?) {
         guard let loc = location else { return }
+        
+        
+        // MARK: No rehacer petición si no han pasado 10 minutos
+        if case .loaded = state,
+           Date().timeIntervalSince(lastUpdated) < 600 {
+            return
+        }
+        
         refresh(lat: loc.latitude, lon: loc.longitude)
     }
     
