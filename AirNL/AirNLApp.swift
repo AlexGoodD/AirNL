@@ -17,11 +17,9 @@ struct AirNLApp: App {
 
     init() {
         #if DEBUG
-        // 👉 Al correr en simulador o debug, usas mocks
         airRepository = MockAirRepository()
         healthRepository = MockHealthRepository()
         #else
-        // 👉 En build Release (App Store/TestFlight), usas los reales
         airRepository = AirRepository.shared
         healthRepository = HealthRepository()
         #endif

@@ -98,7 +98,7 @@ final class HomeViewModel: ObservableObject {
         category = latest.category
         dominantPollutant = latest.pollutant
         lastUpdated = latest.time
-        last8Hours = history
+        last8Hours = history.sorted { $0.time < $1.time}
         trendingMessage = computeTrendingMessage(from: history)
         adviceMessage = advice
         actualLocation = location

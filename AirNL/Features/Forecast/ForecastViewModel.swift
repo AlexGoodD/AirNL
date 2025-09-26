@@ -52,7 +52,7 @@ final class ForecastViewModel: ObservableObject {
     }
 
     private func applyForecast(_ forecast: [AQISample]) {
-        allData = forecast.sorted { $0.time > $1.time }
+        allData = forecast.sorted { $0.time < $1.time }
 
         currentCondition = allData.first
         updateSparkline()
