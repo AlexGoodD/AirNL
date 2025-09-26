@@ -6,8 +6,32 @@
 //
 
 import Foundation
+import MapKit
 
 actor MockAirRepository: AirRepositoryProtocol {
+    func fetchStations(lat: Double, lon: Double) async throws -> [Station] {
+        return [
+            Station(
+                name: "Mock Centro",
+                location: "Mock City",
+                distance: "1.0 km",
+                aqi: 50,
+                category: "Good",
+                updated: "Updated 2m ago",
+                coordinate: .init(latitude: lat + 0.01, longitude: lon)
+            ),
+            Station(
+                name: "Mock Norte",
+                location: "Mock City",
+                distance: "3.2 km",
+                aqi: 120,
+                category: "Unhealthy for Sensitive Groups",
+                updated: "Updated 5m ago",
+                coordinate: .init(latitude: lat - 0.02, longitude: lon + 0.01)
+            )
+        ]
+    }
+    
     
     @MainActor
     func fetchCurrentAQ(lat: Double, lon: Double) async throws -> AQISample {

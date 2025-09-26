@@ -11,6 +11,7 @@ protocol AirRepositoryProtocol {
     func fetchCurrentAQ(lat: Double, lon: Double) async throws -> AQISample
     func fetchForecast(lat: Double, lon: Double, hours: Int) async throws -> [AQISample]
     func fetchLastHours(lat: Double, lon: Double, hours: Int) async throws -> [AQISample]
+    func fetchStations(lat: Double, lon: Double) async throws -> [Station]
     func fetchAdvice(ageGroup: String, activity: String, lat: Double, lon: Double) async throws -> String
 }
 

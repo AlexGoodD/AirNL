@@ -55,16 +55,19 @@ actor AirRepository: AirRepositoryProtocol {
     
     // MARK: Stations
     func fetchStations(lat: Double, lon: Double) async throws -> [Station] {
-        let stations = try await AirAPI.fetchStations(lat: lat, lon: lon)
-        return stations.map {
+        let apiStations = try await AirAPI.fetchStations(lat: lat, lon: lon)
+        
+        return apiStations.map { dto in
             Station(
-                name: $0.name,
-                location: $0.location,
-                distance: $0.distance,
-                aqi: $0.aqi,
-                category: $0.category,
-                updated: $0.updated,
-                coordinate: .init(latitude: $0.lat, longitude: $0.lon)
+                name: dto.name,
+                location: dto.location ?? "Unknown",
+                distance: dto.distance != nil
+                    ? String(format: "%.1f km", dto.distance! / 1000)
+                    : "N/A",
+                aqi: dto.aqi,
+                category: dto.category.isEmpty ? "Unknown" : dto.category,
+                updated: dto.updated ?? "N/A",
+                coordinate: .init(latitude: dto.lat, longitude: dto.lon)
             )
         }
     }

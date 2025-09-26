@@ -9,8 +9,15 @@ import SwiftUI
 import MapKit
 
 struct StationsView: View {
-    @StateObject private var StationsVM = StationsViewModel()
-    @StateObject private var LocRepo = LocationRepository()
+    @Environment(\.airRepository) private var repository
+    @EnvironmentObject private var LocRepo: LocationRepository
+
+    @StateObject private var StationsVM: StationsViewModel
+
+    init(repository: any AirRepositoryProtocol = AirRepository.shared) {
+        _StationsVM = StateObject(wrappedValue: StationsViewModel(repository: repository))
+    }
+
     
     @State private var position: MapCameraPosition = .automatic
     
@@ -58,6 +65,8 @@ struct StationsView: View {
                                 span: MKCoordinateSpan(latitudeDelta: 0.05, longitudeDelta: 0.05)
                             )
                         )
+                        // 👉 Cargar estaciones cercanas
+                        await StationsVM.loadStations(lat: coordinate.latitude, lon: coordinate.longitude)
                     }
                 }
                 
@@ -86,7 +95,7 @@ struct StationsView: View {
 }
 
 struct StationCard: View {
-    let station: StationsViewModel.Station
+    let station: Station
     let color: Color
     
     var body: some View {
@@ -130,7 +139,6 @@ struct StationCard: View {
 }
 
 #Preview {
-    StationsView()
+    StationsView(repository: MockAirRepository())
         .environmentObject(LocationRepository())
-
 }
