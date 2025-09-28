@@ -35,8 +35,18 @@ actor MockAirRepository: AirRepositoryProtocol {
     
     @MainActor
     func fetchCurrentAQ(lat: Double, lon: Double) async throws -> AQISample {
-        AQISample(time: .now, value: 72, category: "Moderate", pollutant: "PM2.5",
-                  humidity: 65, windSpeed: 12)
+        let randomValue = [45, 85, 120, 170, 250, 400].randomElement()!
+        let category: String
+        switch randomValue {
+        case 0...50: category = "Good"
+        case 51...100: category = "Moderate"
+        case 101...150: category = "Unhealthy for Sensitive Groups"
+        case 151...200: category = "Unhealthy"
+        case 201...300: category = "Very Unhealthy"
+        default: category = "Hazardous"
+        }
+        return AQISample(time: .now, value: randomValue, category: category,
+                         pollutant: "PM2.5", humidity: 65, windSpeed: 12)
     }
 
     @MainActor

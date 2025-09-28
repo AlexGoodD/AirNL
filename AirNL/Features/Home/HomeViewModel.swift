@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import SwiftUI
+import UserNotifications
 import MapKit
 
 final class HomeViewModel: ObservableObject {
@@ -26,6 +27,7 @@ final class HomeViewModel: ObservableObject {
     private let repository: AirRepositoryProtocol
     private let healthRepo: HealthRepositoryProtocol
     
+    private var lastCategory: String?
     
     init(
         repository: AirRepositoryProtocol,
@@ -112,6 +114,27 @@ final class HomeViewModel: ObservableObject {
         actualLocation = location
         humidityPercent = latest.humidity ?? 0
         windSpeed = latest.windSpeed ?? 0
+        
+        if let lastCategory, lastCategory != latest.category {
+            triggerCategoryNotification(newCategory: latest.category, value: latest.value, location: location)
+        }
+        self.lastCategory = latest.category
+    }
+    
+    // MARK: Funcion para lanzar notificación al cambio de calidad del AQI
+    private func triggerCategoryNotification(newCategory: String, value: Int, location: String) {
+        let content = UNMutableNotificationContent()
+        content.title = "Air Quality Update"
+        content.body = "AQI is now \(value) (\(newCategory)) in \(location)."
+        content.sound = .default
+
+        let request = UNNotificationRequest(
+            identifier: UUID().uuidString,
+            content: content,
+            trigger: nil // inmediato
+        )
+
+        UNUserNotificationCenter.current().add(request)
     }
     
     //TODO: Mejorar actualmente solo compara primer y último valor

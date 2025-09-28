@@ -10,7 +10,7 @@ import Foundation
 
 struct AirAPI {
     //TODO: Subir en docker para producción
-    static let baseURL = URL(string: "http://10.104.33.51:8000")!
+    static let baseURL = URL(string: "http://192.168.1.118:8000")!
     
     // MARK: Current AQ
     static func fetchCurrentAQ(lat: Double, lon: Double) async throws -> AQISampleDTO {

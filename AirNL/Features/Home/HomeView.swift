@@ -50,7 +50,14 @@ struct HomeView: View {
 #if os(iOS)
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
+                        #if targetEnvironment(simulator)
+                        if let loc = locationRepo.userLocation {
+                            HomeVM.refresh(lat: loc.latitude, lon: loc.longitude)
+                        }
+                        #else
                         HomeVM.refreshFromLocation(locationRepo.userLocation)
+                        #endif
+                        
                     } label: {
                         Image(systemName: "arrow.clockwise")
                     }
